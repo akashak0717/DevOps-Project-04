@@ -10,19 +10,24 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/akashak0717/DevOps-Project-04.git'
+                    url: 'https://github.com/akashak0717/DevOps-Project-04.git'
             }
         }
 
         stage('SonarQube Scan') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                    sonar-scanner \
-                    -Dsonar.projectKey=tomato-app \
-                    -Dsonar.sources=. \
-                    -Dsonar.sourceEncoding=UTF-8
-                    '''
+                script {
+                    def scannerHome = tool 'sonar-scanner'
+
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=tomato-app \
+                        -Dsonar.projectName=tomato-app \
+                        -Dsonar.sources=. \
+                        -Dsonar.sourceEncoding=UTF-8
+                        """
+                    }
                 }
             }
         }
@@ -31,6 +36,12 @@ pipeline {
             steps {
                 sh 'trivy fs .'
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
         }
     }
 }
