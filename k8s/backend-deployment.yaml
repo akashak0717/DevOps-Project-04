@@ -7,21 +7,30 @@ spec:
   selector:
     matchLabels:
       app: backend
+
   template:
     metadata:
       labels:
         app: backend
+
     spec:
       containers:
       - name: backend
         image: 547268988661.dkr.ecr.ap-south-1.amazonaws.com/tomato-backend:latest
         imagePullPolicy: Always
+
         ports:
         - containerPort: 4000
 
         env:
         - name: PORT
           value: "4000"
+
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: tomato-secret
+              key: MONGO_URI
 
         - name: JWT_SECRET
           valueFrom:
