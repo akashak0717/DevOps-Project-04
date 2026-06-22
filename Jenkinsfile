@@ -1,6 +1,16 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'jdk17'
+        nodejs 'node18'
+    }
+
+    environment {
+        AWS_REGION = 'ap-south-1'
+        ACCOUNT_ID = '547268988661'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -10,11 +20,24 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('SonarQube Scan') {
             steps {
-                echo 'Build Stage'
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                    sonar-scanner \
+                    -Dsonar.projectKey=tomato-app \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=$SONAR_HOST_URL \
+                    -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
             }
         }
 
+        stage('Trivy File Scan') {
+            steps {
+                sh 'trivy fs .'
+            }
+        }
     }
 }
