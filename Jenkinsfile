@@ -14,6 +14,19 @@ pipeline {
             }
         }
 
+        stage('SonarQube Scan') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                    sonar-scanner \
+                    -Dsonar.projectKey=tomato-app \
+                    -Dsonar.sources=. \
+                    -Dsonar.sourceEncoding=UTF-8
+                    '''
+                }
+            }
+        }
+
         stage('Trivy File Scan') {
             steps {
                 sh 'trivy fs .'
